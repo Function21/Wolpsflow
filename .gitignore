@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.pnpm-store/
+.wrangler/
+.svelte-kit/
+.vite/
+*.log
+.chrome-check/
+.chrome-debug/
+wolpsflow-*.png
