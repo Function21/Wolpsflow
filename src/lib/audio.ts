@@ -3,15 +3,19 @@ export class AudioEngine {
   private targetVolume = 0.55;
   private fadeRaf: number | null = null;
   private currentSrc = "";
+  onEnded: (() => void) | null = null;
 
   isPlaying = false;
 
+  get currentTrack(): string {
+    return this.currentSrc;
+  }
+
   constructor() {
     this.audio = new Audio();
-    this.audio.loop = true;
     this.audio.preload = "auto";
     this.audio.volume = this.targetVolume;
-    this.audio.crossOrigin = "anonymous";
+    this.audio.addEventListener("ended", () => this.onEnded?.());
   }
 
   async init(): Promise<void> {

@@ -39,15 +39,18 @@
     "/audio/vibehorn-lofi-chill-background-461490.mp3"
   ];
 
-  let status = "";
   let isReady = false;
   let isPlaying = false;
   let sceneIndex = 0;
-  let audioIndex = 0;
   let storyLine = "";
   let storyVisible = false;
   let audio: AudioEngine;
   let quoteRequestId = 0;
+
+  function pickRandomTrack(exclude: string): string {
+    const pool = AUDIO_TRACKS.filter((t) => t !== exclude);
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
 
   function setQuote(quote: Quote | null | undefined): void {
     storyLine = formatQuote(quote);
@@ -68,7 +71,6 @@
     audio.setVolume(0.55);
     isReady = true;
     isPlaying = true;
-    status = "";
     document.body.classList.remove("needs-audio");
   }
 
@@ -77,7 +79,6 @@
       await startExperience();
     } catch {
       document.body.classList.add("needs-audio");
-      status = "Click anywhere to enable sound";
     }
   }
 
@@ -85,7 +86,6 @@
     if (isReady) return;
     startExperience().catch(() => {
       document.body.classList.add("needs-audio");
-      status = "Click play button to enable sound";
     });
   }
 
@@ -105,30 +105,34 @@
 
   function switchPreset(): void {
     sceneIndex = (sceneIndex + 1) % SCENES.length;
-    audioIndex = (audioIndex + 1) % AUDIO_TRACKS.length;
 
-    if (isReady) audio.setTrack(AUDIO_TRACKS[audioIndex]);
+    if (isReady) audio.setTrack(pickRandomTrack(audio.currentTrack));
 
     storyVisible = false;
     const requestId = ++quoteRequestId;
 
-    Promise.all([
-      loadQuote(),
-      new Promise<void>((resolve) => setTimeout(resolve, 700))
-    ]).then(([quote]) => {
+    loadQuote().then((quote) => {
       if (requestId !== quoteRequestId) return;
-      setQuote(quote);
-      storyVisible = true;
+      setTimeout(() => {
+        if (requestId !== quoteRequestId) return;
+        setQuote(quote);
+        storyVisible = true;
+      }, 1400);
     });
+  }
+
+  function advanceTrack(): void {
+    if (!isReady) return;
+    audio.setTrack(pickRandomTrack(audio.currentTrack));
   }
 
   onMount(() => {
     try {
       audio = new AudioEngine();
-      audio.setTrack(AUDIO_TRACKS[audioIndex]);
+      audio.onEnded = advanceTrack;
+      audio.setTrack(AUDIO_TRACKS[Math.floor(Math.random() * AUDIO_TRACKS.length)]);
     } catch (error) {
       console.error("Wolpsflow startup failed", error);
-      status = "Failed to start page, please refresh or check console";
       document.body.classList.add("needs-audio");
       return;
     }
@@ -192,6 +196,4 @@
       <path d="m6 9 6 6 6-6" />
     </svg>
   </button>
-
-  <span class="status-line" id="remixStatus" aria-live="polite">{status}</span>
 </main>

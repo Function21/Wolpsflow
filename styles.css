@@ -97,8 +97,7 @@ svg {
 }
 
 .story-panel,
-.next-link,
-.status-line {
+.next-link {
   pointer-events: auto;
 }
 
@@ -180,23 +179,6 @@ svg {
   color: rgba(238, 238, 232, 0.9);
 }
 
-.status-line {
-  position: fixed;
-  left: 34px;
-  bottom: 34px;
-  max-width: 280px;
-  color: rgba(238, 238, 232, 0.32);
-  font-size: 0.76rem;
-  line-height: 1.5;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 180ms ease;
-}
-
-.needs-audio .status-line {
-  opacity: 1;
-}
-
 @media (max-width: 780px) {
   body {
     overflow: hidden;
@@ -211,10 +193,6 @@ svg {
   .story-text {
     font-size: 0.96rem;
     line-height: 1.62;
-  }
-
-  .status-line {
-    display: none;
   }
 
   .next-link {
