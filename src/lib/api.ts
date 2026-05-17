@@ -7,14 +7,7 @@ export async function loadQuote(): Promise<Quote> {
     try {
       const response = await fetch(QUOTE_ENDPOINT, { cache: "no-store" });
       if (!response.ok) throw new Error(`Quote request failed: ${response.status}`);
-      const rawData = await response.json() as Partial<Quote> & { _id?: string; content?: string };
-      const quote = normalizeQuote(rawData);
-      
-      if (!quote || !quote.id) {
-        console.warn("Invalid quote data received");
-        continue;
-      }
-      
+      const quote = normalizeQuote(await response.json());
       if (!seen.has(quote.id)) {
         rememberQuote(quote);
         return quote;

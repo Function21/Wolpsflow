@@ -10,7 +10,9 @@
       "Bash(node_modules/.bin/svelte-check --tsconfig ./tsconfig.json --threshold error)",
       "Bash(mv public/*.webp public/images/)",
       "Bash(mv public/*.mp3 public/audio/)",
-      "Bash(node_modules/.bin/vite --host 127.0.0.1 --port 5173)"
+      "Bash(node_modules/.bin/vite --host 127.0.0.1 --port 5173)",
+      "Bash(awk 'NR>=160 && NR<=180' styles.css)",
+      "Bash(npm install *)"
     ]
   }
 }
