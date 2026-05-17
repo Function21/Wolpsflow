@@ -7,7 +7,10 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(curl -sL --connect-timeout 5 \"https://quoteslate.vercel.app/api/quotes/random\")",
       "Bash(curl -sL --connect-timeout 5 \"https://api.quoteslate.dev/random\")",
-      "Bash(node_modules/.bin/svelte-check --tsconfig ./tsconfig.json --threshold error)"
+      "Bash(node_modules/.bin/svelte-check --tsconfig ./tsconfig.json --threshold error)",
+      "Bash(mv public/*.webp public/images/)",
+      "Bash(mv public/*.mp3 public/audio/)",
+      "Bash(node_modules/.bin/vite --host 127.0.0.1 --port 5173)"
     ]
   }
 }

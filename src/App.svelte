@@ -2,29 +2,50 @@
   import { onDestroy, onMount } from "svelte";
   import { AudioEngine } from "./lib/audio";
   import { loadQuote } from "./lib/api";
-  import type { Quote, Track } from "./lib/types";
-  import {
-    NEXT_PROMPTS,
-    PRESET_TRACKS,
-    createTrackFromPrompt,
-    formatQuote,
-    getFallbackQuote,
-    mergePrompt,
-    normalizeTrack,
-    pickPromptAccent,
-    rememberQuote
-  } from "./lib/tracks";
+  import type { Quote } from "./lib/types";
+  import { formatQuote } from "./lib/tracks";
 
-  const SCENES = ["/main.webp", "/jazz.webp", "/pomodro.webp", "/sleep.webp", "/synthwave.webp"];
+  const SCENES = [
+    "/images/main.webp",
+    "/images/jazz.webp",
+    "/images/pomodro.webp",
+    "/images/sleep.webp",
+    "/images/synthwave.webp",
+    "/images/cozy-cat-cafe-with-coffee.webp",
+    "/images/lofi-girl-college-scholarships-1920x1131.webp",
+    "/images/469076083_orig.webp"
+  ];
+
+  const AUDIO_TRACKS = [
+    "/audio/aventure-lofi-chill-nostalgic-469629.mp3",
+    "/audio/bfcmusic-lofi-lo-fi-511230.mp3",
+    "/audio/delosound-lofi-lofi-chill-lofi-girl-456265.mp3",
+    "/audio/delosound-lofi-lofi-chill-lofi-girl-466467.mp3",
+    "/audio/delosound-lofi-lofi-chill-lofi-girl-471138.mp3",
+    "/audio/desifreemusic-cozy-lofi-background-music-for-relax-study-amp-sleep-453302.mp3",
+    "/audio/freemusicforvideo-lofi-chill-music-495628.mp3",
+    "/audio/leberch-lofi-vlog-525299.mp3",
+    "/audio/lemonmusiclab-lofi-beat-relax-499261.mp3",
+    "/audio/lofi_music_library-coffee-lofi-chill-lofi-ambient-458901.mp3",
+    "/audio/lofi_music_library-lofi-girl-chill-lofi-beats-lofi-ambient-461871.mp3",
+    "/audio/lofi_music_library-rainy-lofi-city-lofi-music-458076.mp3",
+    "/audio/mondamusic-lofi-lofi-girl-lofi-music-529555.mp3",
+    "/audio/prettyjohn1-lofi-523178.mp3",
+    "/audio/prettyjohn1-lofi-chill-chill_38sec-490468.mp3",
+    "/audio/pulsebox-lofi-melody-522894.mp3",
+    "/audio/pulsebox-lofi-mood-522871.mp3",
+    "/audio/pulsebox-lofi-night-522890.mp3",
+    "/audio/pulsebox-lofi-vinyl-522882.mp3",
+    "/audio/vibehorn-lofi-chill-background-461490.mp3"
+  ];
 
   let status = "";
   let isReady = false;
   let isPlaying = false;
-  let currentIndex = 0;
   let sceneIndex = 0;
-  let remixCount = 0;
-  let currentTrack = normalizeTrack(PRESET_TRACKS[0]);
-  let storyLine = "Loading a quiet thought...";
+  let audioIndex = 0;
+  let storyLine = "";
+  let storyVisible = false;
   let audio: AudioEngine;
   let quoteRequestId = 0;
 
@@ -32,36 +53,19 @@
     storyLine = formatQuote(quote);
   }
 
-  function hydrateTrack(track: Track): void {
-    currentTrack = normalizeTrack(track);
-    if (!currentTrack.quote) {
-      currentTrack.quote = getFallbackQuote();
-      rememberQuote(currentTrack.quote);
-    }
-    setQuote(currentTrack.quote);
-  }
-
   function refreshQuote(): void {
     const requestId = ++quoteRequestId;
-    loadQuote()
-      .then((quote) => {
-        if (requestId !== quoteRequestId) return;
-        currentTrack = { ...currentTrack, quote };
-        setQuote(quote);
-      })
-      .catch((error) => {
-        console.error("Failed to load quote:", error);
-        if (requestId === quoteRequestId) {
-          setQuote(null);
-        }
-      });
+    loadQuote().then((quote) => {
+      if (requestId !== quoteRequestId) return;
+      setQuote(quote);
+      storyVisible = true;
+    });
   }
 
   async function startExperience(): Promise<void> {
     await audio.init();
-    audio.setTrack(currentTrack);
-    audio.setVolume(0.5);
-    audio.play();
+    if (!audio.isPlaying) throw new Error("Autoplay blocked");
+    audio.setVolume(0.55);
     isReady = true;
     isPlaying = true;
     status = "";
@@ -90,49 +94,38 @@
       await startExperience();
       return;
     }
-
     if (audio.isPlaying) {
       audio.pause();
       isPlaying = false;
     } else {
-      audio.play();
-      isPlaying = true;
+      await audio.play();
+      isPlaying = audio.isPlaying;
     }
   }
 
   function switchPreset(): void {
-    currentIndex = (currentIndex + 1) % NEXT_PROMPTS.length;
     sceneIndex = (sceneIndex + 1) % SCENES.length;
-    remixCount += 1;
-    const promptSeed = NEXT_PROMPTS[currentIndex];
-    const nextPrompt = mergePrompt(promptSeed, pickPromptAccent(remixCount));
-    const nextTrack = createTrackFromPrompt(nextPrompt, remixCount, currentTrack, "next");
-    nextTrack.quote = getFallbackQuote();
-    rememberQuote(nextTrack.quote);
-    applyTrack(nextTrack, "");
-    refreshQuote();
+    audioIndex = (audioIndex + 1) % AUDIO_TRACKS.length;
+
+    if (isReady) audio.setTrack(AUDIO_TRACKS[audioIndex]);
+
+    storyVisible = false;
+    const requestId = ++quoteRequestId;
+
+    Promise.all([
+      loadQuote(),
+      new Promise<void>((resolve) => setTimeout(resolve, 700))
+    ]).then(([quote]) => {
+      if (requestId !== quoteRequestId) return;
+      setQuote(quote);
+      storyVisible = true;
+    });
   }
-
-
-  function applyTrack(track: Track, nextStatus: string): void {
-    hydrateTrack(track);
-
-    if (isReady) {
-      audio.setTrack(currentTrack);
-      if (!audio.isPlaying) {
-        audio.play();
-        isPlaying = true;
-      }
-    }
-
-    status = nextStatus;
-  }
-
-
 
   onMount(() => {
     try {
       audio = new AudioEngine();
+      audio.setTrack(AUDIO_TRACKS[audioIndex]);
     } catch (error) {
       console.error("Wolpsflow startup failed", error);
       status = "Failed to start page, please refresh or check console";
@@ -140,7 +133,6 @@
       return;
     }
 
-    hydrateTrack(currentTrack);
     refreshQuote();
 
     window.addEventListener("pointerdown", unlockAudioOnce, { once: true });
@@ -191,9 +183,8 @@
       <strong>Wolpsflow</strong>
     </div>
 
-    <p id="storyLine" class="story-text">{storyLine}</p>
+    <p id="storyLine" class="story-text" class:visible={storyVisible}>{storyLine}</p>
   </header>
-
 
   <button class="next-link" id="nextButton" type="button" on:click={switchPreset}>
     Next
