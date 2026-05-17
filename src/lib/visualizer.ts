@@ -464,7 +464,6 @@ export class StoryVisualizer {
 
   drawBreathingField(ctx: CanvasRenderingContext2D, analysis: MusicState): void {
     const palette = this.getRenderPalette();
-    const cx = this.width * 0.5;
     const cy = this.height * 0.52;
     const random = mulberry32((this.track.seed || 1) ^ 0x4479b31);
     const lanes = 14;
@@ -811,12 +810,4 @@ export class StoryVisualizer {
     ctx.restore();
   }
 
-  drawScan(ctx: CanvasRenderingContext2D): void {
-    ctx.save();
-    ctx.globalAlpha = 0.035;
-    ctx.fillStyle = "#ff5a2f";
-    const y = (this.time * 38) % this.height;
-    ctx.fillRect(0, y, this.width, 1);
-    ctx.restore();
-  }
 }

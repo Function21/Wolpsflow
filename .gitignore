@@ -8,3 +8,4 @@ dist/
 .chrome-check/
 .chrome-debug/
 wolpsflow-*.png
+pnpm-lock.yaml

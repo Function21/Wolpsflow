@@ -9,11 +9,9 @@
     PRESET_TRACKS,
     createTrackFromPrompt,
     formatQuote,
-    getFallbackQuote,
     mergePrompt,
     normalizeTrack,
-    pickPromptAccent,
-    rememberQuote
+    pickPromptAccent
   } from "./lib/tracks";
 
   let canvas: HTMLCanvasElement;
@@ -34,11 +32,7 @@
 
   function hydrateTrack(track: Track): void {
     currentTrack = normalizeTrack(track);
-    if (!currentTrack.quote) {
-      currentTrack.quote = getFallbackQuote();
-      rememberQuote(currentTrack.quote);
-    }
-    setQuote(currentTrack.quote);
+    if (currentTrack.quote) setQuote(currentTrack.quote);
   }
 
   function refreshQuote(): void {
@@ -106,8 +100,7 @@
     const promptSeed = NEXT_PROMPTS[currentIndex];
     const nextPrompt = mergePrompt(promptSeed, pickPromptAccent(remixCount));
     const nextTrack = createTrackFromPrompt(nextPrompt, remixCount, currentTrack, "next");
-    nextTrack.quote = getFallbackQuote();
-    rememberQuote(nextTrack.quote);
+    nextTrack.quote = currentTrack.quote;
     applyTrack(nextTrack, "");
     refreshQuote();
   }
@@ -158,7 +151,7 @@
   });
 
   onDestroy(() => {
-    audio?.pause();
+    audio?.dispose();
   });
 </script>
 
