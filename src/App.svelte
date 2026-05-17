@@ -2,7 +2,6 @@
   import { onDestroy, onMount } from "svelte";
   import { AudioEngine } from "./lib/audio";
   import { loadQuote } from "./lib/api";
-  import { StoryVisualizer } from "./lib/visualizer";
   import type { Quote, Track } from "./lib/types";
   import {
     NEXT_PROMPTS,
@@ -16,16 +15,17 @@
     rememberQuote
   } from "./lib/tracks";
 
-  let canvas: HTMLCanvasElement;
+  const SCENES = ["/main.webp", "/jazz.webp", "/pomodro.webp", "/sleep.webp", "/synthwave.webp"];
+
   let status = "";
   let isReady = false;
   let isPlaying = false;
   let currentIndex = 0;
+  let sceneIndex = 0;
   let remixCount = 0;
   let currentTrack = normalizeTrack(PRESET_TRACKS[0]);
   let storyLine = "Loading a quiet thought...";
   let audio: AudioEngine;
-  let visualizer: StoryVisualizer;
   let quoteRequestId = 0;
 
   function setQuote(quote: Quote | null | undefined): void {
@@ -102,6 +102,7 @@
 
   function switchPreset(): void {
     currentIndex = (currentIndex + 1) % NEXT_PROMPTS.length;
+    sceneIndex = (sceneIndex + 1) % SCENES.length;
     remixCount += 1;
     const promptSeed = NEXT_PROMPTS[currentIndex];
     const nextPrompt = mergePrompt(promptSeed, pickPromptAccent(remixCount));
@@ -115,7 +116,6 @@
 
   function applyTrack(track: Track, nextStatus: string): void {
     hydrateTrack(track);
-    visualizer.setTrack(currentTrack);
 
     if (isReady) {
       audio.setTrack(currentTrack);
@@ -133,7 +133,6 @@
   onMount(() => {
     try {
       audio = new AudioEngine();
-      visualizer = new StoryVisualizer(canvas, audio);
     } catch (error) {
       console.error("Wolpsflow startup failed", error);
       status = "Failed to start page, please refresh or check console";
@@ -142,9 +141,6 @@
     }
 
     hydrateTrack(currentTrack);
-    visualizer.setTrack(currentTrack);
-    visualizer.start();
-
     refreshQuote();
 
     window.addEventListener("pointerdown", unlockAudioOnce, { once: true });
@@ -153,17 +149,24 @@
     return () => {
       window.clearTimeout(autoplayTimer);
       window.removeEventListener("pointerdown", unlockAudioOnce);
-      visualizer.destroy();
     };
   });
 
   onDestroy(() => {
-    audio?.pause();
+    audio?.dispose();
   });
 </script>
 
-<canvas bind:this={canvas} id="visualizer" aria-hidden="true"></canvas>
-<div class="screen-tint" aria-hidden="true"></div>
+<div class="scene-stage" aria-hidden="true">
+  {#each SCENES as src, index}
+    <div
+      class="scene-layer"
+      class:is-active={index === sceneIndex}
+      style:background-image="url({src})"
+    ></div>
+  {/each}
+  <div class="scene-tint"></div>
+</div>
 
 <main class="interface" aria-label="Wolpsflow music space">
   <header class="story-panel">

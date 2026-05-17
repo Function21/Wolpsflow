@@ -60,23 +60,37 @@ svg {
   stroke-width: 2;
 }
 
-#visualizer,
-.screen-tint {
+.scene-stage {
   position: fixed;
   inset: 0;
+  overflow: hidden;
+  background: #050505;
 }
 
-#visualizer {
-  width: 100%;
-  height: 100%;
+.scene-layer {
+  position: absolute;
+  inset: -4%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 1400ms ease-in-out, transform 18000ms linear;
+  will-change: opacity, transform;
 }
 
-.screen-tint {
+.scene-layer.is-active {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.scene-tint {
+  position: absolute;
+  inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 50% 50%, rgba(244, 247, 241, 0.035), transparent 44%),
-    radial-gradient(circle at 22% 22%, rgba(216, 255, 248, 0.025), transparent 34%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.04), transparent 55%, rgba(0, 0, 0, 0.42));
+    radial-gradient(circle at 22% 18%, rgba(255, 200, 140, 0.06), transparent 38%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.28) 55%, rgba(0, 0, 0, 0.55));
 }
 
 .interface {

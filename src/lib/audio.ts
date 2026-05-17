@@ -384,6 +384,30 @@ export class AudioEngine {
     this.transport.pause();
   }
 
+  dispose(): void {
+    if (this.stepEventId !== null && this.transport) {
+      this.transport.clear(this.stepEventId);
+      this.stepEventId = null;
+    }
+    this.transport?.stop();
+    this.guitar?.dispose();
+    this.piano?.dispose();
+    this.pluck?.dispose();
+    this.bass?.dispose();
+    this.kick?.dispose();
+    this.hat?.dispose();
+    this.delay?.dispose();
+    this.reverb?.dispose();
+    this.guitarFilter?.dispose();
+    this.hatFilter?.dispose();
+    this.analyser?.dispose();
+    this.master?.dispose();
+    this.compressor?.dispose();
+    this.limiter?.dispose();
+    this.toneReady = false;
+    this.isPlaying = false;
+  }
+
   now(): number {
     return Tone.now();
   }

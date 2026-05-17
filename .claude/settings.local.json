@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(pnpm --version)",
+      "WebSearch",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -sL --connect-timeout 5 \"https://quoteslate.vercel.app/api/quotes/random\")",
+      "Bash(curl -sL --connect-timeout 5 \"https://api.quoteslate.dev/random\")",
+      "Bash(node_modules/.bin/svelte-check --tsconfig ./tsconfig.json --threshold error)"
+    ]
+  }
+}
