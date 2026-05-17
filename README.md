@@ -32,7 +32,7 @@ The audio path is intentionally bare — pre-recorded MP3s instead of generative
 ## Local Development
 
 ```bash
-git clone https://github.com/<your-username>/Wolpsflow.git
+git clone https://github.com/Function21/Wolpsflow.git
 cd Wolpsflow
 npm install
 npm run dev
