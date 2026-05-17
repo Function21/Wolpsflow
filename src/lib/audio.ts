@@ -28,11 +28,6 @@ export class AudioEngine {
     }
   }
 
-  setVolume(value: number): void {
-    this.targetVolume = Math.max(0, Math.min(1, value));
-    if (!this.fadeRaf) this.audio.volume = this.targetVolume;
-  }
-
   async setTrack(url: string): Promise<void> {
     if (this.currentSrc === url) return;
     this.currentSrc = url;

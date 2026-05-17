@@ -68,25 +68,21 @@
   async function startExperience(): Promise<void> {
     await audio.init();
     if (!audio.isPlaying) throw new Error("Autoplay blocked");
-    audio.setVolume(0.55);
     isReady = true;
     isPlaying = true;
-    document.body.classList.remove("needs-audio");
   }
 
   async function tryAutoplay(): Promise<void> {
     try {
       await startExperience();
     } catch {
-      document.body.classList.add("needs-audio");
+      // Autoplay blocked; will start on first pointerdown.
     }
   }
 
   function unlockAudioOnce(): void {
     if (isReady) return;
-    startExperience().catch(() => {
-      document.body.classList.add("needs-audio");
-    });
+    startExperience().catch(() => {});
   }
 
   async function togglePlayback(): Promise<void> {
@@ -103,10 +99,10 @@
     }
   }
 
-  function switchPreset(): void {
+  function advanceScene(rotateAudio: boolean): void {
     sceneIndex = (sceneIndex + 1) % SCENES.length;
 
-    if (isReady) audio.setTrack(pickRandomTrack(audio.currentTrack));
+    if (rotateAudio && isReady) audio.setTrack(pickRandomTrack(audio.currentTrack));
 
     storyVisible = false;
     const requestId = ++quoteRequestId;
@@ -121,6 +117,10 @@
     });
   }
 
+  function switchPreset(): void {
+    advanceScene(true);
+  }
+
   function advanceTrack(): void {
     if (!isReady) return;
     audio.setTrack(pickRandomTrack(audio.currentTrack));
@@ -133,7 +133,6 @@
       audio.setTrack(AUDIO_TRACKS[Math.floor(Math.random() * AUDIO_TRACKS.length)]);
     } catch (error) {
       console.error("Wolpsflow startup failed", error);
-      document.body.classList.add("needs-audio");
       return;
     }
 
@@ -141,9 +140,11 @@
 
     window.addEventListener("pointerdown", unlockAudioOnce, { once: true });
     const autoplayTimer = window.setTimeout(tryAutoplay, 120);
+    const sceneTimer = window.setInterval(() => advanceScene(false), 15 * 60 * 1000);
 
     return () => {
       window.clearTimeout(autoplayTimer);
+      window.clearInterval(sceneTimer);
       window.removeEventListener("pointerdown", unlockAudioOnce);
     };
   });
@@ -170,7 +171,6 @@
       <button
         class:is-playing={isPlaying}
         class="tiny-icon"
-        id="playButton"
         type="button"
         title="Play or pause"
         aria-label={isPlaying ? "Pause" : "Play"}
@@ -187,10 +187,10 @@
       <strong>Wolpsflow</strong>
     </div>
 
-    <p id="storyLine" class="story-text" class:visible={storyVisible}>{storyLine}</p>
+    <p class="story-text" class:visible={storyVisible}>{storyLine}</p>
   </header>
 
-  <button class="next-link" id="nextButton" type="button" on:click={switchPreset}>
+  <button class="next-link" type="button" on:click={switchPreset}>
     Next
     <svg aria-hidden="true" viewBox="0 0 24 24">
       <path d="m6 9 6 6 6-6" />

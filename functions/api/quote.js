@@ -4,7 +4,7 @@ export async function onRequestGet() {
   try {
     const response = await fetch(QUOTESLATE_ENDPOINT, {
       headers: { Accept: "application/json" },
-      cf: { cacheTtl: 30, cacheEverything: true }
+      cf: { cacheTtl: 0, cacheEverything: false }
     });
 
     if (!response.ok) return json(fallbackQuote());

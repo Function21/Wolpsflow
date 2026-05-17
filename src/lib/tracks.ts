@@ -42,17 +42,13 @@ export function formatQuote(quote: Quote | null | undefined): string {
   return `"${quote.text}" - ${quote.author}`;
 }
 
-let currentQuoteIndex = -1;
-
 export function getFallbackQuote(seen = getSeenQuoteIds()): Quote {
   const available = QUOTES.filter((quote) => !seen.has(quote.id));
   if (!available.length) {
     saveSeenQuoteIds(new Set());
-    currentQuoteIndex = -1;
-    return QUOTES[0];
+    return QUOTES[Math.floor(Math.random() * QUOTES.length)];
   }
-  currentQuoteIndex = (currentQuoteIndex + 1) % available.length;
-  return available[currentQuoteIndex];
+  return available[Math.floor(Math.random() * available.length)];
 }
 
 export function getSeenQuoteIds(): Set<string> {
